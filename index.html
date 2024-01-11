@@ -11,7 +11,7 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="src/style.css" />
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -26,20 +26,25 @@
     ></script>
     <p></p>
 
-    <script defer src="script.js"></script>
+    <script defer type="module" src="src/js/controller.js"></script>
     <title>mapty // Map your workouts</title>
   </head>
   <body>
     <div class="sidebar">
       <img src="logo.png" alt="Logo" class="logo" />
+      <img
+        src="https://pics.freeicons.io/uploads/icons/png/17536770011553771531-512.png"
+        alt="Home"
+      />
       <div>
         <a
           href="https://www.udemy.com/course/the-complete-javascript-course/learn/lecture/22649161#overview"
           >Link to Udemy course</a
         >
       </div>
+      <button class="btn--add-ride">Add a new ride</button>
 
-      <ul class="workouts">
+      <ul class="rides">
         <form class="form hidden">
           <div class="form__row">
             <label class="form__label">Type</label>
@@ -89,6 +94,26 @@
       </p>
     </div>
 
-    <div id="map"></div>
+    <div id="map">
+      <div id="ride-popup" class="hidden">
+        <h3>Your ride is ready to be save</h3>
+        <p>If it is not the case just close me</p>
+        <form>
+          <input type="checkbox" id="ride_remove" name="ride_remove" />
+          <label for="remove_ride"
+            >This ride is rotten ! please remove it!</label
+          >
+          <label for="rode_description"
+            >No, I'm very happy with this ride and I will describe it.</label
+          >
+          <input
+            id="rode_description"
+            type="text"
+            placeholder="Write a description."
+          />
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </div>
   </body>
 </html>

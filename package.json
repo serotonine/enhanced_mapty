@@ -1,0 +1,30 @@
+{
+  "name": "enhanced_mapty",
+  "version": "1.0.0",
+  "description": "Pimp Mapty app",
+  "default": "index.html",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html --dist-dir ./dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/serotonine/enhanced_mapty.git"
+  },
+  "keywords": [
+    "mapty",
+    "leaflet"
+  ],
+  "author": "Jonas Schmedtmann / Serotonine",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/serotonine/enhanced_mapty/issues"
+  },
+  "homepage": "https://github.com/serotonine/enhanced_mapty#readme",
+  "devDependencies": {
+    "@babel/plugin-transform-class-properties": "^7.23.3",
+    "@parcel/transformer-sass": "^2.11.0",
+    "core-js": "^3.35.0",
+    "parcel": "^2.11.0"
+  }
+}
