@@ -1,26 +1,39 @@
 import { MAPZOOM } from './config';
-import RideView from './RideView';
-import { iconHome } from './icons';
-import Running from './Running';
-import Cycling from './Cycling';
-import { getDistance } from './helper';
+import { app, initApp } from './models/model';
+import RideView from './views/RideView';
+import MapView from './views/MapView';
+import PopupView from './views/PopupView';
+import { iconHome, iconMapty } from './models/icons';
+import { getDistance, setLocalStorage } from './models/helper';
 
-/* IMPROVEMENTS
-touch 
- */
-const form = document.querySelector('.form');
-const containerWorkouts = document.querySelector('.workouts');
-const inputType = document.querySelector('.form__input--type');
-const inputDistance = document.querySelector('.form__input--distance');
-const inputDuration = document.querySelector('.form__input--duration');
-const inputCadence = document.querySelector('.form__input--cadence');
-const inputElevation = document.querySelector('.form__input--elevation');
-//
-const app = {
-  map: {},
-  homeCoords: [],
-  current: {},
+const handleRidesClick = function (ride, isRemove) {
+  const id = ride.dataset.id;
+  let polylineId;
+  const [polyline] = app.polylines.filter((item, index) => {
+    polylineId = index;
+    return item.options.className === `polyline-${id}`;
+  });
+  if (!isRemove) {
+    ride.classList.toggle('highlighted');
+    // Toggle Polyline style.
+    MapView.togglePolylinePath(polyline);
+    return;
+  }
+  //// Delete Ride. ////
+  // Delete ride from app.rides
+  app.rides.filter((item, index) => {
+    item.timestamp === +id && app.rides.splice(index, 1);
+  });
+  // Delete ride element from DOM.
+  ride.remove();
+  // Delete polyline from app.polyline.
+  app.polylines.splice(polylineId, 1);
+  // Delete polyline from map.
+  polyline.remove();
+  // Update local storge.
+  setLocalStorage(app.rides);
 };
+
 const getPosition = function () {
   // Geolocalisation.
   // 2 callback functions (success & error).
@@ -30,12 +43,53 @@ const getPosition = function () {
     });
   }
 };
+const toBeDispatched = function () {
+  // Enable "Add new ride" button.
+  RideView.handlerAddRide(handlerAddRide, true);
+  // Populate sidebar display.
+  RideView.renderRides(app.rides);
+  RideView.handlerRidesClick(handleRidesClick);
+  // Populate map's polylines display.
+  app.rides.forEach(ride => {
+    // Add paths
+    const polyline = MapView.renderPolyline(ride);
+    app.polylines.push(polyline);
+    polyline.addTo(app.map);
+    polyline.on('click', function (e) {
+      app.map.panInsideBounds(polyline._bounds, {
+        animate: true,
+        pan: {
+          duration: 0.5,
+        },
+      });
+      // Find matching info.
+      // TODO: make function (MapView.getRideId)
+      const rideIdTab = e.sourceTarget.options.className.split('-');
+      const rideId = rideIdTab[rideIdTab.length - 1];
+      // TODO: make function.
+      const rideInfo = document.querySelector(`[data-id = "${rideId}"]`);
+      if (!rideInfo) {
+        throw new Error('No info linked to this ride.');
+      }
+      // Reset.
+      if (app.selected.includes(this)) {
+        this.setStyle({ color: 'red', opacity: 0.2 });
+        rideInfo.classList.remove('highlighted');
+        const id = app.selected.indexOf(this);
+        app.selected.splice(id, 1);
+      }
+      // Add.
+      else {
+        app.selected.push(this);
+        this.setStyle({ color: '#000', opacity: 1.0 });
+        rideInfo.classList.add('highlighted');
+      }
+    });
+  });
+};
 const loadMap = function (geolocation) {
   const { latitude: lat, longitude: lgn } = geolocation.coords;
   app.homeCoords = [lat, lgn];
-  //TODO IMPROVE
-  /*  const { latitude } = geolocation.coords;
-  const { longitude } = geolocation.coords; */
   app.map = L.map('map').setView(app.homeCoords, MAPZOOM);
 
   L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
@@ -56,54 +110,58 @@ const loadMap = function (geolocation) {
     .setPopupContent('My location')
     .openPopup();
   // Get datas from local storage
-  //this._getLocalStorage();
-
-  // Leaflet API
-  // Click on the map event
-  //app.map.on('click', this._showForm.bind(this));
+  toBeDispatched();
 };
 const closePath = function (steps = []) {
-  steps.pop();
   steps.push(app.homeCoords);
 };
 
-//const app = new App();
 // CONTROLS
 const controlLoadMap = function () {
   getPosition();
 };
-const controllAddRide = function () {
-  /*  const { lat } = app.home;
-  const { lng } = app.home; */
-  // Get home coords.
-  // const homeCoords = Object.values(app.home);
+const handlerAddRide = function () {
+  // Disable "Add new ride" button.
+  RideView.handlerAddRide(handlerAddRide, false);
+  // Add an id.
+  app.current.timestamp = Date.now();
   let steps = [app.homeCoords];
   app.current.marker = L.marker(app.homeCoords, {
     draggable: true,
+    icon: iconMapty,
   }).addTo(app.map);
 
-  // create a red polyline from an array of LatLng points
+  // Create a red Polyline from an array of LatLng points.
   const polyline = L.polyline(steps, {
     color: 'red',
     opacity: 0.2,
     weight: 5,
+    className: `polyline-${app.current.timestamp}`,
   });
-  app.current.marker.on('dragend', function (e) {
-    const coords = this.getLatLng();
-    steps.push(Object.values(this.getLatLng()));
+  app.polylines.push(polyline);
+  // Methods.
+  // app.current.marker.on('dragend', function (e) {
+  //   const latlng = Object.values(this.getLatLng());
+  //   steps.push(latlng);
+  //   // Update polyline.
+  //   polyline.setLatLngs(steps).addTo(app.map);
+  // });
+  // Center again the map.
+  app.current.marker.on('click', function (e) {
+    app.map.setView(this.getLatLng(), MAPZOOM);
+  });
+  let bounds = app.map.getBounds();
+  console.log('bounds', bounds);
+  app.current.marker.on('drag', function (e) {
+    const latlng = Object.values(this.getLatLng());
+    steps.push(latlng);
     // Update polyline.
     polyline.setLatLngs(steps).addTo(app.map);
   });
+
   // Stop and calc distance on double click.
-  app.current.marker.on('dblclick', function (e) {
-    //console.log(`polyline =>`, polyline);
-    // Check that event is not an error
-    if (!confirm('Is your ride complete ?')) {
-      return;
-    }
-    // Add an id
-    app.current.timestamp = Date.now();
-    // Remove last el of array
+  app.current.marker.on('dblclick', e => {
+    // Remove last el of array.
     closePath(steps);
     // Update polyline.
     polyline.setLatLngs(steps).addTo(app.map);
@@ -111,129 +169,58 @@ const controllAddRide = function () {
     let distance = 0;
     steps.forEach((el, index, arr) => {
       if (index > 0) {
-        step = getDistance(el[0], el[1], arr[index - 1][0], arr[index - 1][1]);
-        distance += step;
+        const step = getDistance(
+          el[0],
+          el[1],
+          arr[index - 1][0],
+          arr[index - 1][1]
+        );
+        if (!isNaN(step)) {
+          distance += step;
+        }
       }
     });
-    // Remove marker
-    app.current.marker.remove();
     app.current.distance = distance.toFixed(3);
-    app.current.polyline = polyline;
+    app.current.steps = steps;
     app.current.date = new Date().toDateString();
-    RideView.renderRide(app.current);
+    // Show Ride Popup.
+    PopupView.open(handlerAddRideDesc, handlerClosePopup);
   });
   steps.splice(-1, 0);
-  // console.log(`steps.pop() =>`, steps.pop());
-  console.log(`steps =>`, steps);
+};
+// Dialog submit Event handler.
+const handlerAddRideDesc = function (el) {
+  const textarea = document.getElementById('ride-popup__description');
+  const title = document.getElementById('ride-popup__title');
+  app.current.title = title.value;
+  app.current.description = textarea.value;
+  // Create Ride cart.
+  RideView.renderRide(app.current);
+  // Remove marker.
+  app.current.marker.remove();
+  delete app.current.marker;
+  // Add to localstorage.
+  app.rides.push(app.current);
+  setLocalStorage(app.rides);
+  // Reset app.current
+  app.current = {};
+  // Enable "Add new ride" button.
+  RideView.handlerAddRide(handlerAddRide, true);
+};
+// Close Popup.
+const handlerClosePopup = function () {
+  // Remove marker.
+  app.current.marker.remove();
+  delete app.current.marker;
+  // Remove last polyline
+  const polyline = app.polylines.pop();
+  polyline.remove();
+  // Enable "Add new ride" button.
+  RideView.handlerAddRide(handlerAddRide, true);
 };
 
 // INIT
 (function () {
-  console.log(`INIT`);
+  initApp();
   controlLoadMap();
-  document
-    .querySelector('.btn--add-ride')
-    .addEventListener('click', controllAddRide);
 })();
-
-//////////// BACKUP //////////
-/* const run1 = new Running([50.8008128, 4.3828024], 15, 180, 178);
-const cycling1 = new Cycling([50.8008128, 4.3828024], 15, 30, 523);
-console.log(run1, cycling1); */
-///////// APPLICATION ARCHITECTURE /////////
-class App {
-  #map;
-  #mapEvt;
-  #marker;
-  #workout = [];
-  constructor() {
-    // All methods into constructor are triggered on instanciation.
-    /*     this._getPosition();
-     */
-    // Form's events
-    form.addEventListener('submit', this._newWorkout.bind(this));
-    inputType.addEventListener('change', this._toogleElevationField.bind(this));
-    // Workout's Event
-    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
-  }
-
-  _showForm(mapEvt) {
-    this.#mapEvt = mapEvt;
-    // FORM
-    form.removeAttribute('style');
-
-    form.classList.remove('hidden');
-    // Set focus on input distance
-    inputDistance.focus();
-    const coords = Object.values(mapEvt.latlng);
-    this.#marker = L.marker(coords).addTo(this.#map);
-  }
-  _toogleElevationField(e) {
-    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
-    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
-  }
-  /*  _renderWorkoutPopup(workout, container) {
-    this.#marker
-      .bindPopup(
-        L.popup({
-          maxWidth: 250,
-          minWidth: 100,
-          autoClose: false,
-          closeOnClick: false,
-          className: `${workout.type}-popup`,
-        })
-      ) // string or object
-      .setPopupContent(
-        `<span> ${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}</span> ${
-          workout.description
-        }`
-      )
-      .openPopup();
-  } */
-
-  _hideForm() {
-    inputCadence.value =
-      inputDistance.value =
-      inputDuration.value =
-      inputElevation.value =
-        '';
-    form.style.display = 'none';
-    form.classList.add('hidden');
-  }
-  _moveToPopup(e) {
-    const workoutTarget = e.target.closest('.workout');
-    if (!workoutTarget) {
-      return;
-    }
-    const workout = this.#workout.find(
-      item => item.id === workoutTarget.dataset.id
-    );
-    this.#map.setView(workout.coords, MAPZOOM, {
-      animate: true,
-      pan: {
-        duration: 0.5,
-      },
-    });
-  }
-  _setLocalStorage() {
-    // Don't use local storage to store large amount of datas.
-    localStorage.setItem('workout', JSON.stringify(this.#workout));
-  }
-  _getLocalStorage() {
-    // The local storage lost all inheritance.
-    const datas = JSON.parse(localStorage.getItem('workout'));
-    if (!datas) {
-      return;
-    }
-    this.#workout = datas;
-    this.#workout.forEach(data => {
-      workout._renderWorkout(data, form);
-      this.#marker = L.marker(data.coords).addTo(this.#map);
-    });
-  }
-  // Public function to empty local storage
-  reset() {
-    localStorage.removeItem('workout');
-    location.reload();
-  }
-}

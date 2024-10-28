@@ -1,4 +1,5 @@
 export const MAPZOOM = 20;
+export const LOCALSTORAGEKEY = 'rides';
 export const MONTHS = [
   'January',
   'February',

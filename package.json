@@ -4,8 +4,8 @@
   "description": "Pimp Mapty app",
   "default": "index.html",
   "scripts": {
-    "start": "parcel index.html",
-    "build": "parcel build index.html --dist-dir ./dist"
+    "start": "webpack --watch",
+    "build": "webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -20,11 +20,13 @@
   "bugs": {
     "url": "https://github.com/serotonine/enhanced_mapty/issues"
   },
-  "homepage": "https://github.com/serotonine/enhanced_mapty#readme",
+  "homepage": "https://serotonine.github.io/enhanced_mapty",
   "devDependencies": {
     "@babel/plugin-transform-class-properties": "^7.23.3",
-    "@parcel/transformer-sass": "^2.11.0",
     "core-js": "^3.35.0",
-    "parcel": "^2.11.0"
+    "copy-webpack-plugin": "^12.0.2",
+    "html-webpack-plugin": "^5.6.0",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
   }
 }
