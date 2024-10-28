@@ -1,0 +1,50 @@
+/* RIDE POPUP */
+#ride-popup {
+  color: var(--color-dark--1);
+  position: absolute;
+  z-index: 10000;
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 2px solid var(--color-pink);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s;
+  > h3 {
+    color: var(--color-pink);
+  }
+  > p {
+    color: var(--color-dark--2);
+  }
+  > form {
+    margin-top: 1.5rem;
+    > button {
+      background-color: var(--color-pink);
+    }
+    > label {
+      font-size: 1.5rem;
+      padding-bottom: 0.5rem;
+      display: block;
+    }
+  }
+  &::backdrop{
+    background-color: var(--color-dark--2);
+    opacity:0.5;
+  }
+}
+
+.ride-popup__close{
+  text-align: right;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  opacity:0.5;
+  transition: opacity 0.2s;
+  &:hover,
+  &:focus{
+    opacity:1;
+  }
+}
+
+
+
