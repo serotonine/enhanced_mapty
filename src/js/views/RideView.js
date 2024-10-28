@@ -51,9 +51,7 @@ class RideView {
             <span class="ride__value">${current.distance}</span>
             <span class="ride__unit">km</span>
           </div>
-         
           <h3 class="ride__title">${current.title}</h3>
-         
           <div class="ride__description">
             <p>${current.description}</p>
           </div>
@@ -63,7 +61,7 @@ class RideView {
         </svg></div>
           </li>`;
 
-    this._parentElement.insertAdjacentHTML('beforeend', markup);
+    this._parentElement.insertAdjacentHTML('afterbegin', markup);
   }
 }
 export default new RideView('.rides');

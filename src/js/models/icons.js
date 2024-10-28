@@ -6,7 +6,7 @@ export const iconHome = L.icon({
 });
 
 export const iconMapty = L.icon({
-  iconUrl: '../src/img/icon-shadow.png',
+  iconUrl: 'https://serotonine.alwaysdata.net/images/icon-shadow.png',
   iconSize: [60, 60],
   iconAnchor: [20, 65],
 });

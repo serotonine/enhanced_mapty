@@ -150,8 +150,6 @@ const handlerAddRide = function () {
   app.current.marker.on('click', function (e) {
     app.map.setView(this.getLatLng(), MAPZOOM);
   });
-  let bounds = app.map.getBounds();
-  console.log('bounds', bounds);
   app.current.marker.on('drag', function (e) {
     const latlng = Object.values(this.getLatLng());
     steps.push(latlng);
@@ -160,7 +158,11 @@ const handlerAddRide = function () {
   });
 
   // Stop and calc distance on double click.
-  app.current.marker.on('dblclick', e => {
+  app.current.marker.on('keyup', e => {
+    // Must be enter.
+    if (e.originalEvent.keyCode != 13) {
+      return;
+    }
     // Remove last el of array.
     closePath(steps);
     // Update polyline.
@@ -190,12 +192,19 @@ const handlerAddRide = function () {
 };
 // Dialog submit Event handler.
 const handlerAddRideDesc = function (el) {
+  // Check if app.current is empty.
+  if (Object.keys(app.current).length === 0) {
+    return;
+  }
   const textarea = document.getElementById('ride-popup__description');
   const title = document.getElementById('ride-popup__title');
   app.current.title = title.value;
   app.current.description = textarea.value;
   // Create Ride cart.
   RideView.renderRide(app.current);
+  // Reset form.
+  title.value = '';
+  textarea.value = '';
   // Remove marker.
   app.current.marker.remove();
   delete app.current.marker;
