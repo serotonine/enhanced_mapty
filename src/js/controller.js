@@ -6,6 +6,7 @@ import PopupView from './views/PopupView';
 import { iconHome, iconMapty } from './models/icons';
 import { getDistance, setLocalStorage } from './models/helper';
 
+// Rides cart handlers.
 const handleRidesClick = function (ride, isRemove) {
   const id = ride.dataset.id;
   let polylineId;
@@ -43,6 +44,7 @@ const getPosition = function () {
     });
   }
 };
+// Draw ride on map.
 const toBeDispatched = function () {
   // Enable "Add new ride" button.
   RideView.handlerAddRide(handlerAddRide, true);
@@ -107,16 +109,16 @@ const loadMap = function (geolocation) {
         closeOnClick: false,
       })
     )
-    .setPopupContent('My location')
+    .setPopupContent(`Home`)
     .openPopup();
-  // Get datas from local storage
+  // Get datas from local storage.
   toBeDispatched();
 };
 const closePath = function (steps = []) {
   steps.push(app.homeCoords);
 };
 
-// CONTROLS
+// HANDLERS //
 const controlLoadMap = function () {
   getPosition();
 };
@@ -159,12 +161,14 @@ const handlerAddRide = function () {
 
   // Stop and calc distance on double click.
   app.current.marker.on('keyup', e => {
-    // Must be enter.
+    // Key must be enter.
     if (e.originalEvent.keyCode != 13) {
       return;
     }
     // Remove last el of array.
     closePath(steps);
+    // Stop map dragging.
+    app.map.dragging.disable();
     // Update polyline.
     polyline.setLatLngs(steps).addTo(app.map);
     // Calcul total distance
@@ -190,14 +194,17 @@ const handlerAddRide = function () {
   });
   steps.splice(-1, 0);
 };
-// Dialog submit Event handler.
+// Popup form.
+const textarea = document.getElementById('ride-popup__description');
+const title = document.getElementById('ride-popup__title');
+// Popup submit Event handler.
 const handlerAddRideDesc = function (el) {
   // Check if app.current is empty.
   if (Object.keys(app.current).length === 0) {
     return;
   }
-  const textarea = document.getElementById('ride-popup__description');
-  const title = document.getElementById('ride-popup__title');
+  // const textarea = document.getElementById('ride-popup__description');
+  // const title = document.getElementById('ride-popup__title');
   app.current.title = title.value;
   app.current.description = textarea.value;
   // Create Ride cart.
@@ -215,17 +222,30 @@ const handlerAddRideDesc = function (el) {
   app.current = {};
   // Enable "Add new ride" button.
   RideView.handlerAddRide(handlerAddRide, true);
+  // Start map dragging.
+  app.map.dragging.enable();
 };
 // Close Popup.
 const handlerClosePopup = function () {
   // Remove marker.
-  app.current.marker.remove();
-  delete app.current.marker;
-  // Remove last polyline
+  if (app.current.marker) {
+    app.current.marker.remove();
+    delete app.current.marker;
+  }
+  // Remove last polyline.
   const polyline = app.polylines.pop();
-  polyline.remove();
+  if (polyline) {
+    polyline.remove();
+  }
+  // Reset form.
+  title.value = '';
+  textarea.value = '';
+  // Reset app.current.
+  app.current = {};
   // Enable "Add new ride" button.
   RideView.handlerAddRide(handlerAddRide, true);
+  // Start map dragging.
+  app.map.dragging.enable();
 };
 
 // INIT
