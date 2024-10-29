@@ -230,6 +230,9 @@ button:hover {
   background-color: var(--color-light--1);
   color: var(--color-dark--1);
 }
+.ride.highlighted .ride__unit {
+  color: var(--color-dark--1);
+}
 .ride__date {
   font-size: 1.7rem;
   font-weight: 600;
