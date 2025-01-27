@@ -2,3 +2,4 @@ node_modules
 package-lock.json
 src/css/style.css.map
 docs/
+.DS_Store
