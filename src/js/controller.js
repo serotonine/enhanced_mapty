@@ -1,10 +1,10 @@
-import { MAPZOOM } from './config';
-import { app, initApp } from './models/model';
-import RideView from './views/RideView';
-import MapView from './views/MapView';
-import PopupView from './views/PopupView';
-import { iconHome, iconMapty } from './models/icons';
-import { getDistance, setLocalStorage } from './models/helper';
+import { MAPZOOM } from './config.js';
+import { app, initApp } from './models/model.js';
+import RideView from './views/RideView.js';
+import MapView from './views/MapView.js';
+import PopupView from './views/PopupView.js';
+import { iconHome, iconMapty } from './models/icons.js';
+import { getDistance, setLocalStorage } from './models/helper.js';
 
 // Rides cart handlers.
 const handleRidesClick = function (ride, isRemove) {
@@ -21,7 +21,7 @@ const handleRidesClick = function (ride, isRemove) {
     return;
   }
   //// Delete Ride. ////
-  // Delete ride from app.rides
+  // Delete ride from app.rides.
   app.rides.filter((item, index) => {
     item.timestamp === +id && app.rides.splice(index, 1);
   });
@@ -94,7 +94,7 @@ const loadMap = function (geolocation) {
   app.homeCoords = [lat, lgn];
   app.map = L.map('map').setView(app.homeCoords, MAPZOOM);
 
-  L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+  L.tileLayer('https://a.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(app.map);
