@@ -1,10 +1,10 @@
-import { MAPZOOM } from './config.js';
-import { app, initApp } from './models/model.js';
-import RideView from './views/RideView.js';
-import MapView from './views/MapView.js';
-import PopupView from './views/PopupView.js';
-import { iconHome, iconMapty } from './models/icons.js';
-import { getDistance, setLocalStorage } from './models/helper.js';
+import { MAPZOOM } from './config';
+import { app, initApp } from './models/model';
+import RideView from './views/RideView';
+import MapView from './views/MapView';
+import PopupView from './views/PopupView';
+import { iconHome, iconMapty } from './models/icons';
+import { getDistance, setLocalStorage } from './models/helper';
 
 // Rides cart handlers.
 const handleRidesClick = function (ride, isRemove) {
