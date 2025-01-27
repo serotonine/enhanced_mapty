@@ -94,7 +94,7 @@ const loadMap = function (geolocation) {
   app.homeCoords = [lat, lgn];
   app.map = L.map('map').setView(app.homeCoords, MAPZOOM);
 
-  L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+  L.tileLayer('https://a.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(app.map);

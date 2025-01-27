@@ -162,7 +162,7 @@ button:hover {
 
 /* FOOTER */
 .copyright {
-  margin-top: auto;
+  margin-top: 2rem;
   font-size: 1.3rem;
   text-align: center;
   color: var(--color-light--1);
